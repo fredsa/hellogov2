@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -49,18 +50,18 @@ func main() {
 	}
 
 	// Standard App Engine APIs require `appengine.Main` to have been called.
-	appengine.Main()
+	// appengine.Main()
 
-	// port := os.Getenv("PORT")
-	// if port == "" {
-	// 	port = "8080"
-	// 	log.Printf("Defaulting to port %s", port)
-	// }
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
 
-	// log.Printf("Listening on port %s", port)
-	// if err := http.ListenAndServe(":"+port, nil); err != nil {
-	// 	log.Fatal(err)
-	// }
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func myHandler(w http.ResponseWriter, r *http.Request) {
@@ -120,9 +121,9 @@ func checkAppEngineAPIs(w http.ResponseWriter, ctx context.Context) {
 	}
 
 	if !runningLocally {
-		// Running locally => ``
-		// Server appengine.Main() => `hellogov2.uw.r.appspot.com`
-		// Server ListenAndServe() => ``
+		// Running locally => ""
+		// Server appengine.Main() => "hellogov2.uw.r.appspot.com"
+		// Server ListenAndServe() => ""
 		fmt.Fprintf(w, "appengine.DefaultVersionHostname(ctx)=%v\n", appengine.DefaultVersionHostname(ctx))
 	}
 
@@ -140,7 +141,7 @@ func checkAppEngineAPIs(w http.ResponseWriter, ctx context.Context) {
 
 	// Running locally => false
 	// Server appengine.Main() => false
-	// Server ListenAndServe() =>
+	// Server ListenAndServe() => false
 	fmt.Fprintf(w, "appengine.IsDevAppServer()=%v\n", appengine.IsDevAppServer())
 
 	// Running locally => false
@@ -165,28 +166,28 @@ func checkAppEngineAPIs(w http.ResponseWriter, ctx context.Context) {
 		fmt.Fprintf(w, "appengine.ModuleName(ctx)=%v\n", appengine.ModuleName(ctx))
 	}
 
-	// Running locally => ``
-	// Server appengine.Main() => `677455b700ff0cb62a9b86bdbb00017a75777e73617565722d7064612d6465760001323032343132333174313232383135000100`
-	// Server ListenAndServe() => ``
+	// Running locally => ""
+	// Server appengine.Main() => "677455b700ff0cb62a9b86bdbb00017a75777e73617565722d7064612d6465760001323032343132333174313232383135000100"
+	// Server ListenAndServe() => ""
 	fmt.Fprintf(w, "appengine.RequestID(ctx)=%v\n", appengine.RequestID(ctx))
 
-	// Running locally => `standard`
-	// Server appengine.Main() => `standard`
-	// Server ListenAndServe() => `standard`
+	// Running locally => "standard"
+	// Server appengine.Main() => "standard"
+	// Server ListenAndServe() => "standard"
 	fmt.Fprintf(w, "appengine.ServerSoftware()=%v\n", appengine.ServerSoftware())
 
 	if !runningLocally {
 		// Running locally => err `service bridge HTTP failed: Post "http://appengine.googleapis.internal:10001/rpc_http": dial tcp: lookup appengine.googleapis.internal: no such host`
-		// Server appengine.Main() => `hellogov2@appspot.gserviceaccount.com`
-		// Server ListenAndServe() => `hellogov2@appspot.gserviceaccount.com`
+		// Server appengine.Main() => "hellogov2@appspot.gserviceaccount.com"
+		// Server ListenAndServe() => "hellogov2@appspot.gserviceaccount.com"
 		serviceAccount, err := appengine.ServiceAccount(ctx)
 		fmt.Fprintf(w, "appengine.ServiceAccount(ctx)=%v err=%v\n", serviceAccount, err)
 	}
 
 	if !runningLocally {
 		// Running locally => panics `http: panic serving [::1]:49339: Metadata fetch failed for 'instance/attributes/gae_backend_version': Get "http://metadata/computeMetadata/v1/instance/attributes/gae_backend_version": dial tcp: lookup metadata: no such host`
-		// Server appengine.Main() => `20241231t122815.465917320654064374`
-		// Server ListenAndServe() => `listenandserve.465923307189784710`
+		// Server appengine.Main() => "20241231t122815.465917320654064374"
+		// Server ListenAndServe() => "listenandserve.465923307189784710"
 		fmt.Fprintf(w, "appengine.VersionID(ctx)=%v\n", appengine.VersionID(ctx))
 	}
 }
